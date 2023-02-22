@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vlc_player/flutter_vlc_player.dart';
+import 'package:fullscreen/fullscreen.dart';
 
 class CustomPlayer extends StatefulWidget {
   CustomPlayer({Key? key, required this.url}) : super(key: key);
@@ -22,9 +23,6 @@ class _CustomPlayerState extends State<CustomPlayer> {
     super.dispose();
     await _vlcPlayerController?.stopRendererScanning();
     await _vlcPlayerController?.dispose();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
   }
 
   @override
@@ -47,26 +45,13 @@ class _CustomPlayerState extends State<CustomPlayer> {
     }
   }
 
-  // void checkVideo() {
-  //   // Implement your calls inside these conditions' bodies :
-  //   if (_vlcPlayerController?.value.position ==
-  //       Duration(seconds: 0, minutes: 0, hours: 0)) {
-  //     // print('video Started');
-  //   }
-  //
-  //   // print(
-  //   //     "Position: ${double.parse(_vlcPlayerController.value.position.inSeconds.toString())}");
-  //   // print(
-  //   //     "End: ${double.parse(_vlcPlayerController.value.duration.inSeconds.toString())}");
-  //
-  //   if (_vlcPlayerController?.value.position ==
-  //       _vlcPlayerController?.value.duration) {
-  //     // print('video Ended');
-  //   }
-  //
-  //   playbackValue =
-  //       double.parse(_vlcPlayerController!.value.position.inSeconds.toString());
-  // }
+  void enterFullScreen(FullScreenMode fullScreenMode) async {
+    await FullScreen.enterFullScreen(fullScreenMode);
+  }
+
+  void exitFullScreen() async {
+    await FullScreen.exitFullScreen();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -115,11 +100,11 @@ class _CustomPlayerState extends State<CustomPlayer> {
             ),
           ),
           Positioned(
+            left: 0,
             bottom: 0,
+            right: 0,
             child: Container(
-              width: _isFullScreen
-                  ? MediaQuery.of(context).size.width / 1.2
-                  : MediaQuery.of(context).size.width,
+              width: MediaQuery.of(context).size.width,
               color: Colors.white.withOpacity(0.5),
               child:
                   Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -149,7 +134,7 @@ class _CustomPlayerState extends State<CustomPlayer> {
                         ),
                       ),
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: SizedBox(
                     child: Slider(
                         value: playbackValue,
@@ -171,13 +156,9 @@ class _CustomPlayerState extends State<CustomPlayer> {
                     setState(() {
                       _isFullScreen = !_isFullScreen;
                       if (_isFullScreen) {
-                        SystemChrome.setPreferredOrientations([
-                          DeviceOrientation.landscapeLeft,
-                        ]);
+                        enterFullScreen(FullScreenMode.EMERSIVE_STICKY);
                       } else {
-                        SystemChrome.setPreferredOrientations([
-                          DeviceOrientation.portraitUp,
-                        ]);
+                        exitFullScreen();
                       }
                     });
                   },
